@@ -12,3 +12,7 @@ class Node:
 
     def add_child(self, node):
         self.children.append(node)
+
+    # i values of 0 drop operater, 1 drops left node, 2 drops right node
+    def remove_child(self, i):
+        self.children = self.children[:i] + self.children[i+1:]
