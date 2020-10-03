@@ -1,4 +1,5 @@
 from cst import *
+from imp_lexer import *
 
 base_question = imp_lex('(+,3,(*,2,1))')
 
