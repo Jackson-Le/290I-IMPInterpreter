@@ -16,6 +16,3 @@ def ast(node):
         for i in range(len(node.children)):
             if len(node.children[i].children) > 1:
                 ast(node.children[i])
-
-
-ast(xx)
