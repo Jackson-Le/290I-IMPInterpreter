@@ -9,6 +9,19 @@ def properlyBuilt(tokens):
     else:
         return False
 
+def assignmentCheck(tokens):
+    if type(tokens) != list:
+        return False
+    elif tokens[0][1] == 'ID' and tokens[1][1] != 'BOOLEAN':
+        # checks if first item is  a id
+        if len(tokens) <= 3:
+            return True
+        elif tokens[3] == (';', 'RESERVED'):
+            # and if it ends with a ; -- else its malformed
+            return True
+    else:
+        return False
+
 def findAExp(tokens):
     counter = 0
     if tokens[0][0] == '(':
@@ -21,8 +34,17 @@ def findAExp(tokens):
                 counter -= 1
     return (tokens[0],1)
 
-def buildCST(tokens):
-    if properlyBuilt(tokens):
+def buildCST(tokens, extra_children = []):
+    if assignmentCheck(tokens):
+        operator = Node(value = tokens[1], type = tokens[1][1])
+        Lnode = Node(value = tokens[0], type = tokens[0][1])
+        Rnode = Node(value = tokens[2], type = tokens[2][1])
+        coms = Node(value = tokens[0:3], type = 'COMS', children = [operator, Lnode, Rnode])
+        if tokens[4:] == []:
+            return coms
+        else:
+            return buildCST(tokens[4:], extra_children.append(coms))
+    elif properlyBuilt(tokens):
         operation = tokens[1]
         operator = buildCST(operation)
         nodes_id = findAExp(tokens[3:])
@@ -64,4 +86,13 @@ def buildCST(tokens):
             Rnode = Node(value = right, type = 'INT') # if AExp is singular
     else:
         return Node(value = tokens[0], type = tokens[1])
-    return Node(value = tokens, type = 'Aexp', children = [operator, Lnode, Rnode])
+    return Node(value = tokens, type = 'Aexp', children = [operator, Lnode, Rnode] + extra_children)
+
+def treeWalker(tree):
+    if type(tree.value) != str:
+        print(tree.type)
+        for node in tree.children:
+            treeWalker(node)
+    else:
+        print(tree.type)
+        print(tree.value)

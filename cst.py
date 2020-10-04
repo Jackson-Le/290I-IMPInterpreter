@@ -20,6 +20,9 @@ class Node:
     def update_parent(self, parent):
         self.parent = parent
 
+    def update_value(self, value):
+        self.value = value
+
     # i values of 0 drop operater, 1 drops left node, 2 drops right node
     def remove_child(self, i):
         self.children = self.children[:i] + self.children[i+1:]
