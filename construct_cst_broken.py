@@ -24,12 +24,14 @@ def findAExp(tokens):
 def buildCST(tokens):
     if properlyBuilt(tokens):
         operation = tokens[1]
-        operator = buildCST(operation)
+        operator = Node(value = operation, type = "OPERATOR")
         nodes_id = findAExp(tokens[3:])
         left = nodes_id[0]
         if type(left) == list and len(left) > 1:
             # Lnode is the node that we have made for the left side of the tree
-            Lnode = Node(value = left, type = 'Aexp', children = [buildCST(left[1])])
+            Lnode = Node(value = left, type = 'Aexp')
+            opLnode = buildCST(left[1]) # operator of l node_1
+            Lnode.add_child(opLnode)
             # Lnodes_id is the AExp finding function that returns tokens and the length of the tokens
             Lnodes_id = findAExp(Lnode.value[3:])
             LLnode = buildCST(Lnodes_id[0]) # recursively builds CST node
@@ -48,7 +50,9 @@ def buildCST(tokens):
         right = findAExp(remaining_tokens)[0]
         if type(right) == list and len(right) > 1:
             # Rnode is the node that we have made for the left side of the tree
-            Rnode = Node(value = right, type = 'Aexp', children = [buildCST(remaining_tokens[1])])
+            Rnode = Node(value = right, type = 'Aexp')
+            opRnode = buildCST(remaining_tokens[1]) # operator of r node_1
+            Rnode.add_child(opRnode)
             # Rnodes_id is the AExp finding function that returns tokens and the length of the tokens
             Rnodes_id = findAExp(Rnode.value[3:])
             RLnode = buildCST(Rnodes_id[0])
@@ -64,4 +68,8 @@ def buildCST(tokens):
             Rnode = Node(value = right, type = 'INT') # if AExp is singular
     else:
         return Node(value = tokens[0], type = tokens[1])
-    return Node(value = tokens, type = 'Aexp', children = [operator, Lnode, Rnode])
+    starter_node = Node(value = tokens, type = 'Aexp', children = [operator, Lnode, Rnode])
+    operator.update_parent(starter_node)
+    Lnode.update_parent(starter_node)
+    Rnode.update_parent(starter_node)
+    return  starter_node

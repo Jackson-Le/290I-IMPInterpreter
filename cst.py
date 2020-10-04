@@ -6,12 +6,19 @@ class Node:
         self.type = type
         self.parent = parent
         self.children = children
+        for i in children:
+            i.update_parent(self)
 
     def to_string():
         print(value)
 
     def add_child(self, node):
         self.children.append(node)
+        #print(self.type,":",self.value, "has added", node.type, ':', node.value)
+            #node.update_parent(parent = self)
+
+    def update_parent(self, parent):
+        self.parent = parent
 
     # i values of 0 drop operater, 1 drops left node, 2 drops right node
     def remove_child(self, i):
