@@ -12,15 +12,16 @@ def properlyBuilt(tokens):
 def assignmentCheck(tokens):
     if type(tokens) != list:
         return False
-    elif tokens[0][1] == 'ID' and tokens[1][1] != 'BOOLEAN':
+    return len(tokens) > 2 and tokens[1][0] == ':='
+    #elif tokens[0][1] == 'ID' and tokens[1][1] != 'BOOLEAN':
         # checks if first item is  a id
-        if len(tokens) <= 3:
-            return True
-        elif tokens[3] == (';', 'RESERVED'):
+        #if len(tokens) <= 3:
+            #return True
+        #elif tokens[3] == (';', 'RESERVED'):
             # and if it ends with a ; -- else its malformed
-            return True
-    else:
-        return False
+            #return True
+    #else:
+        #return False
 
 def findAExp(tokens):
     counter = 0
@@ -34,15 +35,63 @@ def findAExp(tokens):
                 counter -= 1
     return (tokens[0],1)
 
+def comsCheck(tokens):
+    #print(tokens)
+    if len(tokens) <= 1 or type(tokens) != type([]):
+        return False
+    return tokens[0][1] == 'COMS'
+
+def makeBexp(tokens):
+    if properlyBuilt(tokens):
+        operator = Node(value = tokens[1][0], type = tokens[1][1])
+        Lnode = Node(value = tokens[3][0], type = tokens[3][1])
+        Rnode = Node(value = tokens[5][0], type = tokens[5][1])
+        coms = Node(value = tokens[0:3], type = 'COMS', children = [operator, Lnode, Rnode])
+        return coms
+    print(tokens)
+    print('malformed')
+    return None
+
+def makeDo(tokens):
+    if tokens[0][0] == 'do':
+        counter = 0
+        for i in range(0, len(tokens)):
+            if tokens[i][0] == '{':
+                counter += 1
+            elif tokens[i][0] == '}':
+                counter -= 1
+                if counter == 0:
+                    last = i
+        print(tokens[2:last])
+        Rnode = buildCST(tokens[2:last])
+        return (Rnode, last)
+    print('malformed')
+    print(tokens)
+    return None
+
+def buildComs(tokens):
+    if tokens[0][1] == 'COMS': # construct a com type
+        if tokens[0][0] == 'while': # construct a while loop
+            operator = Node(value = tokens[0][0], type = tokens[0][1])
+            Lnode = makeBexp(tokens[1:8])
+            intermed = makeDo(tokens[8:])
+            Rnode = intermed[0]
+            last = intermed[1]
+            coms = Node(value = tokens[0:last], type = 'COMS', children = [operator, Lnode, Rnode])
+            return (coms, last)
+
+
 def buildCST(tokens, extra_children = []):
     if assignmentCheck(tokens):
-        operator = Node(value = tokens[1], type = tokens[1][1])
-        Lnode = Node(value = tokens[0], type = tokens[0][1])
-        Rnode = Node(value = tokens[2], type = tokens[2][1])
+        operator = Node(value = tokens[1][0], type = tokens[1][1])
+        Lnode = Node(value = tokens[0][0], type = tokens[0][1])
+        Rnode = buildCST(tokens[2:])
         coms = Node(value = tokens[0:3], type = 'COMS', children = [operator, Lnode, Rnode])
         if tokens[4:] == []:
             return coms
         else:
+            if extra_children == None:
+                return buildCST(tokens[4:], [coms])
             return buildCST(tokens[4:], extra_children.append(coms))
     elif properlyBuilt(tokens):
         operation = tokens[1]
@@ -84,6 +133,13 @@ def buildCST(tokens, extra_children = []):
             Rnode = Node(value = right[0], type = right[1])
         else:
             Rnode = Node(value = right, type = 'INT') # if AExp is singular
+    elif comsCheck(tokens):
+        intermediate = buildComs(tokens)
+        coms = intermediate[0]
+        last = intermediate[1]
+        if extra_children == None:
+            return buildCST(tokens[last:], [coms])
+        return buildCST(tokens[last:], extra_children.append(coms))
     else:
         return Node(value = tokens[0], type = tokens[1])
     return Node(value = tokens, type = 'Aexp', children = [operator, Lnode, Rnode] + extra_children)

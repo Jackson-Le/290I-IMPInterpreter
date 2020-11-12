@@ -8,7 +8,11 @@ i = imp_lex('(+,2,3)')
 n3 = imp_lex('(*,(-,(/,2,1),(*,1,0)),(+,2,8))')
 n2 = imp_lex('(*,(-,3,5),(+,2,7))')
 n1 = imp_lex('(-,(*,3,9),4)')
+e = imp_lex('n:=1')
+e1 = imp_lex('n:=(+,2,3)')
+while_loop = imp_lex('while(>=,n,1)do{ans:=(+,ans,n);n:=(-,n,1)}')
 
+bool = imp_lex('(>=,n,1)')
 
 #print('this is x:')
 xx = buildCST(x)
@@ -24,6 +28,11 @@ ii = buildCST(i)
 
 nn1 = buildCST(n1)
 
+ee1 = buildCST(e)
+ee2 = buildCST(e1)
+
+#w1 = buildCST(while_loop)
+
 def treeWalker(tree):
     if type(tree.value) != str:
         print(tree.type)
@@ -33,4 +42,12 @@ def treeWalker(tree):
         print(tree.type)
         print(tree.value)
 
+#treeWalker(ee1)
+print(e1)
+treeWalker(ee1)
+
+#print(makeBexp(bool))
+#treeWalker(makeBexp(bool))
 #treeWalker(nn1)
+
+#treeWalker(w1)
